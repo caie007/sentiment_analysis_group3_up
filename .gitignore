@@ -1,0 +1,19 @@
+# virtual environment
+.venv/
+
+# trained checkpoints (regenerate with scripts/03_run_all.py)
+models/
+
+# downloaded data (regenerate with scripts/01_load_data.py)
+data/
+
+# PyCharm
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# Hugging Face / misc
+.cache/
+*.log
