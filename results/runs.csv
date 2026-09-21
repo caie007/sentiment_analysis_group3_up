@@ -1,0 +1,3 @@
+tag,model,lang,seed,test_set,epochs,batch,lr,n_train,n_test,f1_weighted,f1_macro,accuracy,f1_neg,f1_neu,f1_pos,train_min
+clean,AfriBERTa-large,tso,1,clean,5,16,2e-05,804,254,48.95,39.44,53.54,50.0,4.26,64.06,1.1
+clean,AfriBERTa-large,tso,1,cs,5,16,2e-05,804,254,45.05,35.77,50.39,39.74,4.0,63.58,1.1
