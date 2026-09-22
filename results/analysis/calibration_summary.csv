@@ -1,0 +1,9 @@
+tag,model,test_set,ece,mean_conf,accuracy,overconfidence
+clean,AfriBERTa-large,clean,18.63,80.23,62.08,18.15
+clean,AfriBERTa-large,cs,19.63,79.31,59.88,19.43
+clean,AfroXLMR-base,clean,14.4,78.77,64.73,14.04
+clean,AfroXLMR-base,cs,16.13,78.5,62.77,15.73
+clean,XLM-R-base,clean,14.02,73.29,60.44,12.85
+clean,XLM-R-base,cs,15.39,72.77,58.28,14.49
+cs_aug,AfroXLMR-base,clean,16.66,82.05,65.88,16.17
+cs_aug,AfroXLMR-base,cs,17.95,81.92,64.38,17.54

@@ -1,0 +1,4 @@
+model,mean_sd_over_seeds,max_sd_over_seeds
+AfriBERTa-large,0.91,3.0
+AfroXLMR-base,0.99,2.39
+XLM-R-base,3.54,27.41

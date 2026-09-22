@@ -1,0 +1,4 @@
+A,B,mean_diff_A_minus_B,boot95_lo,boot95_hi,paired_t_p,wilcoxon_p,A_wins_langs,n_pairs
+AfroXLMR-base,AfriBERTa-large,2.65,0.78,4.69,0.1689,0.2334,8,36
+AfroXLMR-base,XLM-R-base,5.1,2.51,8.57,0.0331,0.021,9,36
+AfriBERTa-large,XLM-R-base,2.45,-1.19,6.73,0.438,0.4238,8,36

@@ -1,0 +1,5 @@
+tag,model,clean,cs,drop_clean_minus_cs
+clean,AfriBERTa-large,61.24,58.38,2.86
+clean,AfroXLMR-base,63.89,61.72,2.17
+clean,XLM-R-base,58.79,56.29,2.5
+cs_aug,AfroXLMR-base,65.24,63.74,1.51
