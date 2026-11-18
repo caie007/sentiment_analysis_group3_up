@@ -32,7 +32,9 @@ def step(name, cmd, required=True):
 
 if not BASE_CSV.exists():
     step("load data", [SC / "01_load_data.py"])
+step("exploratory data analysis", [SC / "00_eda.py"], required=False)
 step("build code-switch augmentation", [SC / "03_augment.py"])
+step("TF-IDF baselines", [SC / "09_baseline_tfidf.py"], required=False)
 if not args.skip_grid:
     step("clean grid (3 models x 12 langs x seeds)", [SC / "04_run_grid.py", "--seeds", *S])
 if not args.skip_robust:

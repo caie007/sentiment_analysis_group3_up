@@ -1,0 +1,3 @@
+model,mean_wF1,mean_macroF1,worst_lang,worst_wF1,near_zero_class_cells,langs_balanced_weights,mean_cs_wF1,drop_clean_minus_cs,mean_ece
+TFIDF-LR,63.3,57.7,ary,52.7,1,8,62.3,0.97,6.81
+TFIDF-SVM,63.5,58.1,amh,50.1,1,8,62.2,1.32,

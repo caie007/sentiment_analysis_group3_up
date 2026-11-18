@@ -1,0 +1,13 @@
+lang,pct_latin_letters,pct_arabic_letters,pct_ethiopic_letters,pct_tweets_mixed_script,pct_tweets_no_letters,dominant_script
+amh,2.2,0.0,97.8,7.6,0.0,Ethiopic
+arq,1.6,98.4,0.0,2.8,0.0,Arabic
+ary,43.9,56.1,0.0,0.9,0.0,Arabic
+hau,100.0,0.0,0.0,0.1,0.0,Latin
+ibo,100.0,0.0,0.0,0.0,0.0,Latin
+kin,100.0,0.0,0.0,0.0,0.0,Latin
+pcm,100.0,0.0,0.0,0.0,0.0,Latin
+por,100.0,0.0,0.0,0.0,0.0,Latin
+swa,100.0,0.0,0.0,0.0,0.0,Latin
+tso,100.0,0.0,0.0,0.0,0.0,Latin
+twi,100.0,0.0,0.0,0.0,0.0,Latin
+yor,100.0,0.0,0.0,0.0,0.0,Latin
