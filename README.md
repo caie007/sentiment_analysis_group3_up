@@ -1,12 +1,9 @@
-# COS 801 Deep Learning  AfriSenti Replication and Extension
+# COS 801 Deep Learning Project: Sentiment Analysis in Code-Switched Social Media Text
 
 University of Pretoria, COS 801 research project (2026), Group 3.
 **Group members:** Gishon K Gwenzi (21731056), Letsoba Savannah Mabe (20582995), Vincent Mabuza (10633244)
 
-Replication of the AfriSenti benchmark (Muhammad et al., 2023)  three-class
-sentiment analysis of tweets in 12 African languages  using three pretrained
-transformer encoders, extended with a TF-IDF baseline, a per-language fairness
-analysis and a synthetic code-switching robustness study.
+Sentiment analysis of code-switched social media text remains a challenge, especially for African languages with limited training data and representation in multilingual language models. This study first reproduces the results of the Afrisenti benchmark, then investigates the performance of Africa-centric language models compared to a general-purpose multilingual model, investigates the impact of language representation in pre-training, and finally evaluates whether synthetic code-switching can improve classification robustness. Three transformer-based models, AfroXLMR, AfriBERTa, and XLM-R, were fine-tuned and evaluated on 12 African languages using the AfriSenti dataset. Model performance was measured using weighted F1 scores across three random seeds. The results show that AfroXLMR achieved the highest average weighted F1 score of 63.9%, followed by AfriBERTa at 61.2% and XLM-R at 58.8%. Model performance varied across languages, with Xitsonga, Moroccan Arabic, and Amharic being the worst-performing languages for the respective models. These findings suggest that training data availability and language representation during pre-training  influence classification performance. Synthetic code-switching reduced the overall performance of all three models when trained on the original data. Although synthetic code-switching initially reduced classification performance, retraining AfroXLMR with augmented data improved its robustness and performance from 2.2 to 1.5 F1 points on both the original and code-switched test data. 
 
 | | |
 |---|---|
