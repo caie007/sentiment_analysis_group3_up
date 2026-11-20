@@ -1,188 +1,192 @@
-# COS 801 Deep Learning Project: Sentiment Analysis in Code-Switched Social Media Text
+# Sentiment Analysis in Code-Switched Social Media Text
 
-University of Pretoria, COS 801 research project (2026), Group 3.
+University of Pretoria, COS 801 Deep Learning research project (2026), Group 3.
 **Group members:** Gishon K Gwenzi (21731056), Letsoba Savannah Mabe (20582995), Vincent Mabuza (10633244)
 
-Sentiment analysis of code-switched social media text remains a challenge, especially for African languages with limited training data and representation in multilingual language models. This study first reproduces the results of the Afrisenti benchmark, then investigates the performance of Africa-centric language models compared to a general-purpose multilingual model, investigates the impact of language representation in pre-training, and finally evaluates whether synthetic code-switching can improve classification robustness. Three transformer-based models, AfroXLMR, AfriBERTa, and XLM-R, were fine-tuned and evaluated on 12 African languages using the AfriSenti dataset. Model performance was measured using weighted F1 scores across three random seeds. The results show that AfroXLMR achieved the highest average weighted F1 score of 63.9%, followed by AfriBERTa at 61.2% and XLM-R at 58.8%. Model performance varied across languages, with Xitsonga, Moroccan Arabic, and Amharic being the worst-performing languages for the respective models. These findings suggest that training data availability and language representation during pre-training  influence classification performance. Synthetic code-switching reduced the overall performance of all three models when trained on the original data. Although synthetic code-switching initially reduced classification performance, retraining AfroXLMR with augmented data improved its robustness and performance from 2.2 to 1.5 F1 points on both the original and code-switched test data. 
+---
 
-Setup
-python -m venv .venv
-.venv\Scripts\activate
-pip install torch --index-url https://download.pytorch.org/whl/cu126
-| | |
-|---|---|
-| Exploratory data analysis | `scripts/00_eda.py` |
-| RQ3.1 Model comparison (replication of the paper) | `scripts/06_analysis_comparison.py` |
-| RQ3.2 Per-language fairness and worst-group analysis | `scripts/07_analysis_fairness.py` |
-| RQ3.3 Code-switching robustness and calibration | `scripts/08_analysis_robustness.py` |
-| TF-IDF baselines | `scripts/09_baseline_tfidf.py` |
-| Whole pipeline in one command | `scripts/run_overnight.py` |
+## 1. What the project is about
+
+Sentiment analysis of code-switched social media text remains a challenge,
+especially for African languages with limited training data and representation
+in multilingual language models. This study first reproduces the results of the
+AfriSenti benchmark, then investigates the performance of Africa-centric
+language models compared to a general-purpose multilingual model, investigates
+the impact of language representation in pre-training, and finally evaluates
+whether synthetic code-switching can improve classification robustness. Three
+transformer-based models, AfroXLMR, AfriBERTa, and XLM-R, were fine-tuned and
+evaluated on 12 African languages using the AfriSenti dataset. Model
+performance was measured using weighted F1 scores across three random seeds.
+The results show that AfroXLMR achieved the highest average weighted F1 score
+of 63.9%, followed by AfriBERTa at 61.2% and XLM-R at 58.8%. Model performance
+varied across languages, with Xitsonga, Moroccan Arabic, and Amharic being the
+worst-performing languages for the respective models. These findings suggest
+that training data availability and language representation during
+pre-training influence classification performance. Inserting synthetic
+code-switching into the test data reduced the performance of all three models
+when trained on the original data. Retraining AfroXLMR with augmented data
+improved its robustness, reducing the drop under code-switching from 2.2 to
+1.5 F1 points, and improved its performance on both the original and
+code-switched test data.
+
+The project answers three research questions:
+
+| | Question | Analysis script |
+|---|---|---|
+| RQ1 | Do Africa-centric encoders outperform a general-purpose encoder, and by how much per language? | `scripts/06_analysis_comparison.py` |
+| RQ2 | How does performance vary across languages within the same model? | `scripts/07_analysis_fairness.py` |
+| RQ3 | Can synthetic code-switching augmentation improve robustness without degrading performance on the original data? | `scripts/08_analysis_robustness.py` |
 
 ---
 
-## Dataset
+## 2. Files in this repository
+
+### Top level
+
+| File | What is in it |
+|---|---|
+| `README.md` | This file. |
+| `requirements.txt` | The Python packages needed to run the code. |
+
+### `scripts/` (run in the order of their numbers)
+
+| File | What is in it |
+|---|---|
+| `scripts/config.py` | Shared settings used by every other script: folder paths, the 12 language codes and names, the three Hugging Face model ids, seeds (1, 2, 3), training settings (5 epochs, batch 16, learning rate 2e-5, max 128 tokens) and the AfriSenti paper's reference scores. |
+| `scripts/00_eda.py` | Exploratory data analysis. Computes class balance, tweet length, vocabulary, unseen-word rate, duplicates, label shift between splits and script mix per language. Writes tables and figures to `results/eda/`. |
+| `scripts/01_load_data.py` | Downloads the official AfriSenti train, dev and test files for the 12 languages and saves them as one file, `data/afrisenti_all.csv`. |
+| `scripts/02_train.py` | Fine-tunes one encoder on one language with one seed, selects the best epoch on the dev set, evaluates on the original and the code-switched test sets, saves the predictions to `results/preds/` and adds the scores to `results/runs.csv`. |
+| `scripts/03_augment.py` | Builds the synthetic code-switched data by span splicing (fixed seed 0): the augmented training set `data/afrisenti_cs_train.csv` and the perturbed test set `data/afrisenti_cs_test.csv`. |
+| `scripts/04_run_grid.py` | Runs `02_train.py` for the full clean grid: 3 models x 12 languages x 3 seeds = 108 runs. Skips runs that are already recorded. |
+| `scripts/05_run_robustness.py` | Retrains AfroXLMR on the augmented training set: 12 languages x 3 seeds = 36 runs. |
+| `scripts/06_analysis_comparison.py` | RQ1. Builds the per-language comparison of the three models against the paper and runs the significance tests (paired t-test, Wilcoxon, bootstrap). |
+| `scripts/07_analysis_fairness.py` | RQ2. Builds per-language weighted, macro and per-class F1 tables, and the best-versus-worst language summary. |
+| `scripts/08_analysis_robustness.py` | RQ3. Compares scores on the original and code-switched test sets, with and without augmentation, and computes calibration error (ECE). |
+| `scripts/09_baseline_tfidf.py` | Trains the TF-IDF baselines (logistic regression and linear SVM on word 1-2-grams and character 2-5-grams), tunes them on the dev set and compares them with the encoders. Writes to `results/baseline/`. |
+| `scripts/run_overnight.py` | Runs every step above in sequence and logs progress to `results/overnight.log`. |
+
+### `data/` (created by the scripts)
+
+| File | What is in it |
+|---|---|
+| `data/afrisenti_all.csv` | All AfriSenti tweets in one table with columns `tweet`, `label`, `lang`, `split`. |
+| `data/afrisenti_cs_train.csv` | Original training tweets plus one code-switched copy of each (same-label donor span). |
+| `data/afrisenti_cs_test.csv` | Code-switched copy of all 34,307 test tweets (neutral donor span). |
+
+### `results/`
+
+| File | What is in it |
+|---|---|
+| `results/runs.csv` | One row per run and test set: model, language, seed, weighted F1, macro F1, accuracy, per-class F1 and training time. |
+| `results/overnight.log` | Log of the full pipeline run, with the time taken by each stage. |
+| `results/preds/` | One CSV per run and test set with the predicted label and class probabilities for every test tweet. |
+| `results/eda/` | Output of `00_eda.py`: `eda_class_balance.csv`, `eda_length.csv`, `eda_vocabulary.csv`, `eda_duplicates.csv`, `eda_label_shift.csv`, `eda_script_mix.csv`, `eda_splits.csv`, `eda_surface.csv`, `eda_top_tokens.csv`, `eda_truncation.csv` and the matching figures. |
+| `results/baseline/baseline_runs.csv` | One row per TF-IDF model, language and test set, with the selected settings and scores. |
+| `results/baseline/baseline_summary.csv` | Average scores of the two TF-IDF models. |
+| `results/baseline/baseline_vs_transformers.csv` | TF-IDF scores next to the three encoders, per language. |
+| `results/baseline/baseline_vs_transformers.png` | Figure of the comparison above. |
+| `results/baseline/preds/` | TF-IDF predictions per language and test set. |
+| `results/analysis/comparison_table.csv` | Mean and standard deviation per language and model, next to the paper's scores. |
+| `results/analysis/comparison_significance.csv` | Significance tests between each pair of models. |
+| `results/analysis/comparison_seed_spread.csv` | Variation of each model across the three seeds. |
+| `results/analysis/comparison_models_vs_paper.png` | Figure of our scores against the paper's. |
+| `results/analysis/fairness_per_language_weighted.csv` | Weighted F1 per language and model. |
+| `results/analysis/fairness_per_language_macro.csv` | Macro F1 per language and model. |
+| `results/analysis/fairness_per_class.csv` | F1 for negative, neutral and positive per language and model. |
+| `results/analysis/fairness_worst_group.csv` | Best and worst language, the gap between them and the correlation with training size, per model. |
+| `results/analysis/fairness_heatmap_worstgroup.png` | Heatmap of scores per model and language. |
+| `results/analysis/fairness_size_vs_f1.png` | Score against training-set size. |
+| `results/analysis/robustness_summary.csv` | Average score on the original and code-switched test sets, with and without augmentation. |
+| `results/analysis/robustness_per_language.csv` | The same comparison per language. |
+| `results/analysis/robustness_drop_per_language.png` | Figure of the drop under code-switching per language. |
+| `results/analysis/calibration_summary.csv` | Calibration error (ECE) per model. |
+| `results/analysis/calibration_per_language.csv` | Calibration error per model and language. |
+| `results/analysis/calibration_per_run.csv` | Calibration error per run. |
+| `results/analysis/calibration_reliability.png` | Reliability diagram. |
+
+---
+
+## 3. Dataset
+
+The project uses **AfriSenti** (Muhammad et al., 2023), the dataset of
+SemEval-2023 Task 12: tweets in African languages labelled negative, neutral or
+positive by native speakers.
 
 | | |
 |---|---|
-| Name | AfriSenti-SemEval 2023 (Task 12) |
-| Publisher | Muhammad et al., 2023 |
+| Where to find it | https://github.com/afrisenti-semeval/afrisent-semeval-2023 |
 | Paper | https://aclanthology.org/2023.emnlp-main.862/ |
-| Repository | https://github.com/afrisenti-semeval/afrisent-semeval-2023 |
-| File pattern | `data/<lang>/{train,dev,test}.tsv` in the repository above |
-| Coverage | 111,718 tweets in 14 languages; 12 languages have training data (106,828 tweets) |
-| Labels | negative, neutral, positive |
-| Format | Tab-separated text (tweet, label) |
-| Licence | See the AfriSenti repository; free for research use with citation of the paper |
+| Size | 111,718 tweets in 14 languages |
+| Used here | The 12 languages with training data (106,828 tweets), with the official train, dev and test splits |
+| Format | Tab-separated text files, one per language and split |
 
-**No tweets are committed to this repository.** `scripts/01_load_data.py`
-downloads the official splits and writes `data/afrisenti_all.csv`.
+Training tweets per language: Hausa (14,172), Igbo (10,192), Yorùbá (8,522),
+Amharic (5,984), Moroccan Arabic (5,583), Nigerian Pidgin (5,121), Twi (3,481),
+Kinyarwanda (3,302), Mozambican Portuguese (3,063), Swahili (1,810), Algerian
+Arabic (1,651) and Xitsonga (804). Oromo and Tigrinya have no training data and
+are not used.
 
-### A note on loading the data
-
-The Hugging Face dataset loaders for AfriSenti **do not work with
-`datasets` 5.x** (script-based loaders were removed). This project reads the
-TSV files directly from the AfriSenti GitHub repository instead, so the
-official train / dev / test splits are used unchanged.
-
-### Languages and splits
-
-Defined in `scripts/config.py`. Training tweets per language:
-
-| Size | Languages |
-|---|---|
-| Large | Hausa (14,172), Igbo (10,192), Yorùbá (8,522) |
-| Medium | Amharic (5,984), Moroccan Arabic (5,583), Nigerian Pidgin (5,121), Twi (3,481), Kinyarwanda (3,302), Mozambican Portuguese (3,063) |
-| Small | Swahili (1,810), Algerian Arabic (1,651), Xitsonga (804) |
-
-Oromo and Tigrinya have dev and test data only and are not used.
-No text cleaning is applied; tweets are used as published.
-
-### Synthetic code-switched data
-
-Built by `scripts/03_augment.py` with a fixed seed (0):
-
-- **Augmented training set**  `data/afrisenti_cs_train.csv`. Each training
-  tweet gets one copy with 2–5 tokens spliced in from a tweet in another
-  language **with the same label** (2× training data).
-- **Perturbed test set**  `data/afrisenti_cs_test.csv`. Each of the 34,307
-  test tweets gets 2–5 tokens spliced in from a **neutral** tweet in another
-  language, so the gold label is unchanged.
+You do not need to download the dataset by hand: `scripts/01_load_data.py`
+fetches the official files from the repository above. No text cleaning is
+applied.
 
 ---
 
-## Models
+## 4. How to run the code
 
-| Model | Hugging Face id | Pretraining |
-|---|---|---|
-| AfroXLMR-base | `Davlan/afro-xlmr-base` | XLM-R adapted to 17 African languages |
-| AfriBERTa-large | `castorini/afriberta_large` | Trained from scratch on 11 African languages |
-| XLM-R-base | `xlm-roberta-base` | 100 languages, general purpose |
-| TF-IDF + LR / SVM | scikit-learn | None (word 1–2-grams and character 2–5-grams) |
+### Requirements
 
-Encoders: AdamW, learning rate 2e-5, batch 16, 5 epochs, 10% warm-up, weight
-decay 0.01, max 128 tokens, best epoch chosen on dev weighted F1, seeds 1–3.
-TF-IDF: `C` and class weights chosen on the dev set.
+- Python 3.12
+- A CUDA GPU for the encoders (tested with PyTorch 2.14, transformers 5.16 and
+  datasets 5.0). The TF-IDF baselines and the analysis scripts run on a CPU.
+- Internet access on the first run, to download the dataset and the three
+  pretrained models.
 
----
-
-## Reproducing the analysis
-
-Requires Python 3.12 and, for the encoders, a CUDA GPU (tested with
-torch 2.14 + cu126, transformers 5.16, datasets 5.0). Internet access is needed
-on the first run to download the data and the three models.
+### Set up
 
 ```bash
-python -m venv .venv && .venv\Scripts\activate      # Windows; use source .venv/bin/activate on Linux/macOS
+git clone https://github.com/caie007/afrisenti.git
+cd afrisenti
+
+python -m venv .venv
+.venv\Scripts\activate            # Windows (on Linux/macOS: source .venv/bin/activate)
+
 pip install -r requirements.txt
-pip install sentencepiece protobuf                  # needed by the AfriBERTa tokenizer
-
-python scripts/run_overnight.py                     # everything, 3 seeds (~9 GPU-hours)
-python scripts/run_overnight.py --seeds 1           # single-seed pass (~3.5 hours)
+pip install sentencepiece protobuf    # needed by the AfriBERTa tokenizer
 ```
 
-Or step by step:
+### Option A: run everything with one command
 
 ```bash
-python scripts/01_load_data.py           # download official splits
-python scripts/00_eda.py                 # EDA tables and figures
-python scripts/03_augment.py             # code-switched train and test sets
-python scripts/09_baseline_tfidf.py      # TF-IDF baselines (~5 min, CPU)
-python scripts/04_run_grid.py            # 3 models x 12 languages x 3 seeds
-python scripts/05_run_robustness.py      # AfroXLMR retrained on augmented data
-python scripts/06_analysis_comparison.py
-python scripts/07_analysis_fairness.py
-python scripts/08_analysis_robustness.py
+python scripts/run_overnight.py             # all steps, 3 seeds (about 9 hours on one GPU)
+python scripts/run_overnight.py --seeds 1   # quicker single-seed pass (about 3.5 hours)
 ```
 
-The pipeline is resumable: runs already recorded in `results/runs.csv` are
-skipped, so it is safe to re-run after an interruption. Progress is logged to
-`results/overnight.log`.
+### Option B: run step by step
+
+```bash
+python scripts/01_load_data.py             # 1. download the dataset
+python scripts/00_eda.py                   # 2. exploratory data analysis
+python scripts/03_augment.py               # 3. build the code-switched train and test sets
+python scripts/09_baseline_tfidf.py        # 4. TF-IDF baselines (about 5 minutes, CPU)
+python scripts/04_run_grid.py              # 5. fine-tune 3 models x 12 languages x 3 seeds
+python scripts/05_run_robustness.py        # 6. retrain AfroXLMR on augmented data
+python scripts/06_analysis_comparison.py   # 7. RQ1 tables and tests
+python scripts/07_analysis_fairness.py     # 8. RQ2 tables and figures
+python scripts/08_analysis_robustness.py   # 9. RQ3 tables and figures
+```
+
+### Notes
+
+- The pipeline can be stopped and restarted: runs already recorded in
+  `results/runs.csv` are skipped.
+- To reproduce only the tables and figures from the saved results, run steps
+  7 to 9; they read `results/runs.csv` and `results/preds/` and need no GPU.
+- All outputs are written to `results/`.
 
 ---
 
-## Layout
-
-```
-.
-README.md
-requirements.txt
-scripts/               config, data loading, training, augmentation, analysis
-data/                  created by 01_load_data.py and 03_augment.py
-results/
- runs.csv              one row per (run, test set)
- overnight.log         pipeline log
- preds/                per-run test predictions with probabilities
- eda/                  EDA tables and figures
- baseline/             TF-IDF results and predictions
- analysis/             tables and figures for RQ3.1, RQ3.2, RQ3.3
-```
-
-## Outputs
-
-| File | Contents |
-|---|---|
-| `results/runs.csv` | weighted F1, macro F1, accuracy, per-class F1 and training time for every run |
-| `results/analysis/comparison_table.csv` | per-language mean and SD for each model against the paper's Table 7 |
-| `results/analysis/comparison_significance.csv` | paired t-test, Wilcoxon and bootstrap intervals between models |
-| `results/analysis/comparison_seed_spread.csv` | variation across seeds |
-| `results/analysis/fairness_per_language_weighted.csv` | weighted F1 by language and model |
-| `results/analysis/fairness_per_language_macro.csv` | macro F1 by language and model |
-| `results/analysis/fairness_per_class.csv` | per-class F1 by language and model |
-| `results/analysis/fairness_worst_group.csv` | best and worst language, gap, correlation with training size |
-| `results/analysis/robustness_summary.csv` | clean vs. perturbed test scores, with and without augmentation |
-| `results/analysis/robustness_per_language.csv` | perturbation drop by language |
-| `results/analysis/calibration_summary.csv` | expected calibration error (15 bins) by model |
-| `results/baseline/baseline_summary.csv` | TF-IDF LR and SVM headline results |
-| `results/baseline/baseline_vs_transformers.csv` | TF-IDF against the three encoders by language |
-| `results/eda/` | class balance, length, vocabulary, OOV, duplicates, label shift, script mix |
-
-## Headline results
-
-Mean weighted F1 over 12 languages (encoders: mean of 3 seeds):
-
-| Model | Clean test | Perturbed test |
-|---|---|---|
-| AfroXLMR-base (paper: 63.9) | 63.9 | 61.7 |
-| AfroXLMR-base + augmentation | 65.2 | 63.7 |
-| TF-IDF + SVM | 63.5 | 62.2 |
-| TF-IDF + LR | 63.3 | 62.3 |
-| AfriBERTa-large (paper: 61.7) | 61.2 | 58.4 |
-| XLM-R-base (paper: 62.1) | 58.8 | 56.3 |
-
-XLM-R-base includes one diverged Amharic run (seed 2); its mean is 60.1
-without it.
-
-## Attribution
-
-AfriSenti data © the AfriSenti authors. If you use this work, cite:
+## Reference
 
 Muhammad, S. H. et al. (2023). *AfriSenti: A Twitter Sentiment Analysis
 Benchmark for African Languages.* EMNLP 2023.
-
-Models: AfroXLMR (Alabi et al., 2022), AfriBERTa (Ogueji et al., 2021),
-XLM-R (Conneau et al., 2020).
-
-## Report and presentation
-
-Report: `report/` *(add the PDF here)*
-Presentation: `presentation/COS_801_Project_Presentation.pptx` *(add the slides or a link here)*
