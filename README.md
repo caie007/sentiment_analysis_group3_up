@@ -145,8 +145,8 @@ applied.
 ### Set up
 
 ```bash
-git clone https://github.com/caie007/afrisenti.git
-cd afrisenti
+git clone https://github.com/caie007/sentiment_analysis_group3_up.git
+cd sentiment_analysis_group3_up
 
 python -m venv .venv
 .venv\Scripts\activate            # Windows (on Linux/macOS: source .venv/bin/activate)
